@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Thank you · AI Chat Vault</title>
+    <link rel="icon" href="assets/favicon.png" />
+    <link rel="stylesheet" href="assets/style.css" />
+  </head>
+  <body>
+    <header class="site-head">
+      <div class="wrap">
+        <a class="brand" href="./"><img src="assets/icon.png" alt="" />AI Chat Vault</a>
+        <nav>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+          <a href="refunds.html">Refunds</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <h1>Thank you for buying Pro</h1>
+
+      <div id="has-key" hidden>
+        <p class="lead">Here is your license key. It has also been emailed to you.</p>
+        <div id="keys"></div>
+      </div>
+      <p id="no-key" class="lead" hidden>Your license key has been emailed to you. It may take a minute to arrive; check your spam folder too.</p>
+
+      <h2>Activate it</h2>
+      <ol>
+        <li>Click the AI Chat Vault icon in Chrome's toolbar to open the library.</li>
+        <li>Go to <strong>Settings</strong> and click <strong>Enter license key</strong>.</li>
+        <li>Paste your key and click <strong>Activate</strong>.</li>
+      </ol>
+      <p>You can use the same key in up to 3 browsers.</p>
+      <p class="meta">
+        Something not working? Email <a href="mailto:manhar05anand@gmail.com">manhar05anand@gmail.com</a> with the address you
+        bought with.
+      </p>
+    </main>
+
+    <footer class="site-foot">
+      <div class="wrap">
+        <a href="privacy.html">Privacy policy</a>
+        <a href="terms.html">Terms</a>
+        <a href="refunds.html">Refund policy</a>
+        <a href="mailto:manhar05anand@gmail.com">Contact</a>
+      </div>
+    </footer>
+
+    <script>
+      // The key arrives as ?license_key=KEY (comma-separated if there are several). It is shown here and never sent anywhere.
+      (function () {
+        var params = new URLSearchParams(location.search);
+        var raw = params.get('license_key') || '';
+        var keys = raw.split(',').map(function (k) { return k.trim(); }).filter(Boolean);
+        if (!keys.length) {
+          document.getElementById('no-key').hidden = false;
+          return;
+        }
+        var list = document.getElementById('keys');
+        keys.forEach(function (key) {
+          var row = document.createElement('div');
+          row.className = 'key';
+          var code = document.createElement('code');
+          code.textContent = key;
+          var button = document.createElement('button');
+          button.type = 'button';
+          button.textContent = 'Copy';
+          button.addEventListener('click', function () {
+            navigator.clipboard.writeText(key).then(function () {
+              button.textContent = 'Copied';
+              setTimeout(function () { button.textContent = 'Copy'; }, 1500);
+            });
+          });
+          row.appendChild(code);
+          row.appendChild(button);
+          list.appendChild(row);
+        });
+        document.getElementById('has-key').hidden = false;
+        // Keep the key out of browser history and bookmarks.
+        history.replaceState(null, '', location.pathname);
+      })();
+    </script>
+  </body>
+</html>
