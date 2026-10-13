@@ -1,0 +1,203 @@
+/* Outsourced website: the same painted-scoreboard look as the extension. Fonts are self-hosted. */
+@font-face {
+  font-family: 'Big Shoulders';
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(big-shoulders.woff2) format('woff2-variations');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-weight: 400;
+  font-display: swap;
+  src: url(barlow-400.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-weight: 600;
+  font-display: swap;
+  src: url(barlow-600.woff2) format('woff2');
+}
+
+:root {
+  --board: #1d4a37;
+  --plate: #0d251b;
+  --paint: #eceee4;
+  --chalk: #a3bdae;
+  --lamp: #f4c542;
+  --lamp-ink: #13281e;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--board);
+}
+
+body {
+  margin: 0;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0) 30rem),
+    var(--board);
+  color: var(--paint);
+  font: 400 17px/1.6 'Barlow', 'Segoe UI', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--paint);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lamp);
+  outline-offset: 2px;
+}
+
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.painted,
+h1,
+h2 {
+  font-family: 'Big Shoulders', 'Arial Narrow', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+
+.site-head .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-size: 22px;
+}
+
+.brand img {
+  width: 28px;
+  height: 28px;
+}
+
+nav a {
+  color: var(--chalk);
+}
+
+nav a[aria-current='page'] {
+  color: var(--paint);
+}
+
+/* Where two steel panels meet. */
+.seam {
+  height: 3px;
+  background:
+    linear-gradient(rgba(5, 20, 14, 0.6), rgba(5, 20, 14, 0.6)) top / 100% 2px no-repeat,
+    linear-gradient(rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.07)) bottom / 100% 1px no-repeat;
+}
+
+section {
+  padding: 48px 0;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(64px, 14vw, 120px);
+}
+
+h2 {
+  margin: 0 0 16px;
+  font-size: 36px;
+}
+
+h3 {
+  margin: 24px 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.lead {
+  max-width: 34ch;
+  margin: 20px 0 0;
+  font-size: 22px;
+  line-height: 1.4;
+}
+
+.muted,
+.meta {
+  color: var(--chalk);
+}
+
+p,
+li {
+  max-width: 62ch;
+}
+
+ul {
+  padding-left: 1.2em;
+}
+
+li + li {
+  margin-top: 6px;
+}
+
+.card {
+  margin: 36px 0 0;
+}
+
+.card img {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.card figcaption {
+  margin-top: 12px;
+  color: var(--chalk);
+  font-size: 15px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  margin-top: 8px;
+  padding: 0 18px;
+  border-radius: 6px;
+  background: var(--lamp);
+  color: var(--lamp-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.button:hover {
+  background: #ffd45e;
+  color: var(--lamp-ink);
+}
+
+footer {
+  padding: 32px 0 48px;
+  color: var(--chalk);
+  font-size: 14px;
+}
