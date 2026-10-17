@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; connect-src 'self'; font-src 'self' data: blob:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Flatbed: offline PDF scanner</title>
+  <meta name="description" content="Scan paper to PDF on your own device. No account, no upload, no permissions. Works in airplane mode.">
+  <meta name="theme-color" content="#f3efe6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#11100d" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="bar">
+    <a class="brand" href="./" aria-label="Flatbed home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="7" y="4" width="18" height="24" rx="2.5" class="b-page"/><rect x="4" y="15" width="24" height="2.4" rx="1.2" class="b-beam"/></svg>
+      <span>Flatbed</span>
+    </a>
+    <div class="bar-right">
+      <span class="status" id="status"><i></i><span>Private</span></span>
+      <button class="btn ghost small" id="installBtn" hidden>Install</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Offline PDF scanner</p>
+        <h1>Paper in. PDF out. <em>Nothing leaves your device.</em></h1>
+        <p class="lede">Flatbed straightens, cleans and stitches your pages into a PDF on your own phone or laptop. No account, no upload, no permission prompts. Open an existing PDF to reorder, rotate, clean up or add pages. It all works in airplane mode.</p>
+        <div class="cta">
+          <button class="btn primary big" id="scanBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.3-2h5.2l1.3 2h1.6A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.4" r="3.4"/></svg>
+            <span>Scan a page</span>
+          </button>
+          <button class="btn big" id="importBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="m4 17 5-5 4 4 2.5-2.5L20 18"/><circle cx="15.5" cy="9" r="1.6"/></svg>
+            <span>From device</span>
+          </button>
+        </div>
+        <ul class="zeros" aria-label="Privacy">
+          <li><b>0</b><span>permissions</span></li>
+          <li><b>0</b><span>uploads</span></li>
+          <li><b>0</b><span>accounts</span></li>
+          <li><b>0</b><span>watermarks</span></li>
+        </ul>
+        <p class="hint desktop-only">Or drop photos and PDFs anywhere. Paste works too.</p>
+      </div>
+      <div class="demo" aria-hidden="true">
+        <div class="desk">
+          <div class="paper">
+            <div class="beam"></div>
+            <i class="l h"></i><i class="l"></i><i class="l"></i><i class="l s"></i>
+            <i class="l"></i><i class="l"></i><i class="l s"></i>
+            <i class="l"></i><i class="l"></i><i class="l"></i><i class="l s"></i><i class="sig"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace" id="workspace" hidden>
+      <div class="ws-head">
+        <h2 id="docName">Scan</h2>
+        <p id="docMeta" class="muted"></p>
+      </div>
+      <ol class="pages" id="pages"></ol>
+    </section>
+  </main>
+
+  <footer class="dock" id="dock" hidden>
+    <button class="btn" id="addBtn">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      <span>Add page</span>
+    </button>
+    <button class="btn primary" id="exportBtn">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h7l4.5 4.5v11A1.5 1.5 0 0 1 17 20.5H7A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5z"/><path d="M14 3.5V8h4.5M12 11v6m-2.5-2.5L12 17l2.5-2.5"/></svg>
+      <span>Make PDF</span>
+    </button>
+  </footer>
+
+  <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
+  <input type="file" id="fileInput" accept="image/*,application/pdf,.pdf" multiple hidden>
+
+  <dialog class="sheet editor" id="editor" aria-labelledby="edTitle">
+    <header class="sheet-head">
+      <div class="seg" role="tablist" aria-label="Edit mode">
+        <button role="tab" data-tab="crop" aria-selected="true">Corners</button>
+        <button role="tab" data-tab="look" aria-selected="false">Look</button>
+        <button role="tab" data-tab="mark" aria-selected="false">Mark up</button>
+      </div>
+      <h2 id="edTitle" class="ed-title">Page 1</h2>
+      <button class="btn primary small" id="edDone">Done</button>
+    </header>
+
+    <div class="stage" id="stage">
+      <div class="frame" id="frame">
+        <img id="edImg" alt="" draggable="false">
+        <svg id="edSvg" preserveAspectRatio="none" aria-hidden="true">
+          <path class="shade" fill-rule="evenodd"/>
+          <polygon class="edge"/>
+        </svg>
+        <button class="handle" data-i="0" aria-label="Top-left corner"></button>
+        <button class="handle" data-i="1" aria-label="Top-right corner"></button>
+        <button class="handle" data-i="2" aria-label="Bottom-right corner"></button>
+        <button class="handle" data-i="3" aria-label="Bottom-left corner"></button>
+        <div class="loupe" id="loupe" hidden></div>
+        <div class="beam-wrap"><div class="beam"></div></div>
+      </div>
+    </div>
+
+    <div class="tools" data-for="crop">
+      <p class="muted tool-hint">Drag the corners to the edges of the page.</p>
+      <div class="tool-row">
+        <button class="btn small" id="edAuto">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8m8 0h2.5A1.5 1.5 0 0 1 20 5.5V8m0 8v2.5a1.5 1.5 0 0 1-1.5 1.5H16m-8 0H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>Auto-detect</span>
+        </button>
+        <button class="btn small" id="edFull">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1.5"/></svg>
+          <span>Whole photo</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="tools" data-for="look" hidden>
+      <div class="chips" id="chips" role="radiogroup" aria-label="Look"></div>
+      <p class="muted tool-hint" id="lookHint" hidden>Original keeps the PDF page as it is, with sharp, selectable text. The other looks turn it into a cleaned-up image.</p>
+      <div class="tool-row">
+        <button class="btn small" id="edRotate">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12A7.5 7.5 0 1 1 17 6.4"/><path d="M19 3.5v4h-4"/></svg>
+          <span>Rotate</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="tools" data-for="mark" hidden>
+      <div class="mark-tools" role="toolbar" aria-label="Mark up tools">
+        <button class="tool" data-tool="select" aria-pressed="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5 18 12l-5.2 1.3L10 18.5z"/></svg><span>Move</span>
+        </button>
+        <button class="tool" data-tool="text" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 6.5V5h13v1.5M12 5v14m-3 0h6"/></svg><span>Text</span>
+        </button>
+        <button class="tool" data-tool="pen" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5.5 4 4L9 19H5v-4z"/><path d="m12.5 7.5 4 4"/></svg><span>Draw</span>
+        </button>
+        <button class="tool" data-tool="highlight" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 14 6.5-9.5 4 3L13 17z"/><path d="m9 14-2 2.5 1.5 1.5H11l2-1M4 20.5h16"/></svg><span>Highlight</span>
+        </button>
+        <button class="tool" id="mkSign">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 16.5c2.5-6 4.5-9 6-9 2.5 0-1.5 9 1 9 1.5 0 2.5-3 4-3s1 2.5 2.5 2.5c.8 0 1.6-.5 2.5-1.5M4 20.5h16"/></svg><span>Sign</span>
+        </button>
+        <button class="tool" id="mkDate">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4m7-4v4"/></svg><span>Date</span>
+        </button>
+      </div>
+      <div class="tool-row mark-row">
+        <div class="swatches" id="mkColors"></div>
+        <div class="seg sizes" aria-label="Size">
+          <button data-size="s" aria-selected="false" aria-label="Small">S</button>
+          <button data-size="m" aria-selected="true" aria-label="Medium">M</button>
+          <button data-size="l" aria-selected="false" aria-label="Large">L</button>
+        </div>
+        <span class="spacer"></span>
+        <button class="icon-btn" id="mkUndo" aria-label="Undo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7.5 4.5 12 9 16.5"/><path d="M5 12h9.5a5 5 0 0 1 0 10H12"/></svg></button>
+        <button class="icon-btn" id="mkDelete" aria-label="Delete selected mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2m-7 0 .8 11.2A1.5 1.5 0 0 0 9.3 19.6h5.4a1.5 1.5 0 0 0 1.5-1.4L17 7"/></svg></button>
+      </div>
+    </div>
+
+    <footer class="sheet-foot">
+      <button class="icon-btn" id="edLeft" aria-label="Move page earlier"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></button>
+      <button class="icon-btn" id="edRight" aria-label="Move page later"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></button>
+      <span class="spacer"></span>
+      <button class="btn small danger" id="edDelete">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2m-7 0 .8 11.2A1.5 1.5 0 0 0 9.3 19.6h5.4a1.5 1.5 0 0 0 1.5-1.4L17 7"/></svg>
+        <span>Delete page</span>
+      </button>
+    </footer>
+  </dialog>
+
+  <dialog class="sheet exporter" id="exporter" aria-labelledby="exTitle">
+    <header class="sheet-head">
+      <h2 id="exTitle">Make PDF</h2>
+      <button class="icon-btn" id="exClose" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+    </header>
+    <div class="ex-body">
+      <label class="field">
+        <span>File name</span>
+        <input id="exName" type="text" autocomplete="off" spellcheck="false" enterkeyhint="done">
+      </label>
+      <fieldset class="field">
+        <legend>Page size</legend>
+        <div class="seg wide" id="exSize">
+          <label><input type="radio" name="size" value="a4" checked><span>A4</span></label>
+          <label><input type="radio" name="size" value="letter"><span>Letter</span></label>
+          <label><input type="radio" name="size" value="fit"><span>Fit to scan</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="field">
+        <legend>Quality</legend>
+        <div class="seg wide" id="exQuality">
+          <label><input type="radio" name="quality" value="small"><span>Small</span></label>
+          <label><input type="radio" name="quality" value="balanced" checked><span>Balanced</span></label>
+          <label><input type="radio" name="quality" value="high"><span>Sharp</span></label>
+        </div>
+      </fieldset>
+      <p class="estimate" id="exEstimate"></p>
+    </div>
+    <footer class="sheet-foot ex-foot">
+      <button class="btn" id="exShare" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m-4 4 4-4 4 4"/><path d="M7 11H6a1.5 1.5 0 0 0-1.5 1.5v6A1.5 1.5 0 0 0 6 20h12a1.5 1.5 0 0 0 1.5-1.5v-6A1.5 1.5 0 0 0 18 11h-1"/></svg>
+        <span>Share</span>
+      </button>
+      <button class="btn primary" id="exDownload">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m-4-4 4 4 4-4M5 19.5h14"/></svg>
+        <span>Download PDF</span>
+      </button>
+    </footer>
+  </dialog>
+
+  <dialog class="sheet signer" id="signer" aria-labelledby="sgTitle">
+    <header class="sheet-head">
+      <h2 id="sgTitle">Your signature</h2>
+      <button class="icon-btn" id="sgClose" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+    </header>
+    <div class="sg-body">
+      <div class="sg-saved" id="sgSaved" hidden>
+        <button class="sg-saved-use" id="sgSavedUse"><img id="sgSavedImg" alt="Saved signature"><span>Use saved signature</span></button>
+        <button class="btn ghost small" id="sgForget">Forget</button>
+      </div>
+      <canvas class="sg-pad" id="sgPad" aria-label="Signature pad"></canvas>
+      <p class="muted sg-hint">Sign above with your finger, a stylus or the mouse.</p>
+      <label class="sg-remember"><input type="checkbox" id="sgRemember"> Remember it on this device</label>
+    </div>
+    <footer class="sheet-foot">
+      <button class="btn" id="sgClear">Clear</button>
+      <span class="spacer"></span>
+      <button class="btn primary" id="sgUse" disabled>Use signature</button>
+    </footer>
+  </dialog>
+
+  <dialog class="sheet adder" id="adder" aria-label="Add pages">
+    <div class="adder-body">
+      <button class="choice" id="addCamera">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.3-2h5.2l1.3 2h1.6A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.4" r="3.4"/></svg>
+        <span><b>Camera</b><small>Photograph a page</small></span>
+      </button>
+      <button class="choice" id="addDevice">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5A2 2 0 0 1 5.5 5.5h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg>
+        <span><b>From device</b><small>Photos or PDF files</small></span>
+      </button>
+      <button class="btn ghost" id="addCancel">Cancel</button>
+    </div>
+  </dialog>
+
+  <div class="drop" id="drop" hidden><div><b>Drop to add</b><span>Photos and PDFs stay on this device</span></div></div>
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+</body>
+</html>
